@@ -31,8 +31,8 @@ export function SiteNavbar() {
   return (
     <>
       <NavBar items={navItems} />
-      <div className="fixed top-6 right-6 z-50">
-        <AnimatedThemeToggler className="p-2 rounded-full bg-background/5 border border-border backdrop-blur-lg hover:bg-muted transition-colors" />
+      <div className="fixed top-6 right-6 z-50 pointer-events-auto">
+        <AnimatedThemeToggler className="p-2 rounded-full bg-background/5 border border-border backdrop-blur-lg hover:bg-muted transition-colors pointer-events-auto" />
       </div>
     </>
   );
