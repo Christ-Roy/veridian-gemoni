@@ -2,7 +2,7 @@ import { RoiCalculator } from "@/components/calculator/roi-calculator";
 
 export default function CalculateurPage() {
   return (
-    <main className="min-h-screen py-20">
+    <main className="h-screen overflow-hidden">
       <RoiCalculator />
     </main>
   );
