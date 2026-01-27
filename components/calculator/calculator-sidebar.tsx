@@ -1,9 +1,11 @@
 "use client";
 
+import { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Card } from "@/components/ui/card";
 import { TrendingUp, Target, BarChart3 } from "lucide-react";
 import {
   Sidebar,
@@ -13,6 +15,7 @@ import {
   SidebarGroupLabel,
   SidebarFooter,
 } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
 
 interface CalculatorSidebarProps {
   prixVente: number;
@@ -39,6 +42,79 @@ export function CalculatorSidebar({
   tauxConversion,
   setTauxConversion,
 }: CalculatorSidebarProps) {
+  // États pour gérer les modes personnalisés
+  const [prixVenteMode, setPrixVenteMode] = useState<string>("100");
+  const [margeMode, setMargeMode] = useState<string>("15");
+  const [budgetMode, setBudgetMode] = useState<string>("1000");
+  const [cpcMode, setCpcMode] = useState<string>("2");
+  const [conversionMode, setConversionMode] = useState<string>("3");
+
+  // Gestion du changement de prix de vente
+  const handlePrixVenteChange = (value: string) => {
+    setPrixVenteMode(value);
+    if (value !== "custom") {
+      setPrixVente(Number(value));
+    }
+  };
+
+  // Gestion du changement de marge
+  const handleMargeChange = (value: string) => {
+    setMargeMode(value);
+    if (value !== "custom") {
+      setMarge(Number(value));
+    }
+  };
+
+  // Gestion du changement de budget
+  const handleBudgetChange = (value: string) => {
+    setBudgetMode(value);
+    if (value !== "custom") {
+      setBudgetMensuel(Number(value));
+    }
+  };
+
+  // Gestion du changement de CPC
+  const handleCpcChange = (value: string) => {
+    setCpcMode(value);
+    if (value !== "custom") {
+      setCpc(Number(value));
+    }
+  };
+
+  // Gestion du changement de taux de conversion
+  const handleConversionChange = (value: string) => {
+    setConversionMode(value);
+    if (value !== "custom") {
+      setTauxConversion(Number(value));
+    }
+  };
+
+  // Calcul du ROAS (Return On Ad Spend)
+  const roas = useMemo(() => {
+    const clicsMensuels = budgetMensuel / cpc;
+    const conversions = (clicsMensuels * tauxConversion) / 100;
+    const chiffreAffaires = conversions * prixVente;
+    return budgetMensuel > 0 ? chiffreAffaires / budgetMensuel : 0;
+  }, [prixVente, budgetMensuel, cpc, tauxConversion]);
+
+  // Déterminer la couleur et le message selon le ROAS
+  const getRoasColor = () => {
+    if (roas < 1) return "bg-destructive";
+    if (roas < 2) return "bg-[oklch(0.7686_0.1647_70.0804)]"; // Jaune/Orange
+    return "bg-primary";
+  };
+
+  const getRoasTextColor = () => {
+    if (roas < 1) return "text-destructive-foreground";
+    if (roas < 2) return "text-foreground";
+    return "text-primary-foreground";
+  };
+
+  const getRoasMessage = () => {
+    const roasFormatted = roas.toFixed(2);
+    return `1€ dans Google Ads ramène ${roasFormatted}€ de CA`;
+  };
+
   return (
     <Sidebar variant="sidebar" className="h-full">
       <SidebarContent className="h-full flex flex-col justify-center py-8">
@@ -50,34 +126,71 @@ export function CalculatorSidebar({
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <div className="space-y-4 px-2">
+              {/* Prix de vente */}
               <div className="space-y-2">
                 <Label htmlFor="prix" className="text-xs">
                   Prix de vente unitaire (€)
                 </Label>
-                <Input
+                <select
                   id="prix"
-                  type="number"
-                  value={prixVente}
-                  onChange={(e) => setPrixVente(Number(e.target.value))}
-                  min="0"
-                  step="0.01"
-                  className="h-9"
-                />
+                  value={prixVenteMode}
+                  onChange={(e) => handlePrixVenteChange(e.target.value)}
+                  className={cn(
+                    "flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors",
+                    "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                    "disabled:cursor-not-allowed disabled:opacity-50"
+                  )}
+                >
+                  <option value="100">100€</option>
+                  <option value="500">500€</option>
+                  <option value="2000">2000€</option>
+                  <option value="custom">Personnalisé</option>
+                </select>
+                {prixVenteMode === "custom" && (
+                  <Input
+                    type="number"
+                    value={prixVente}
+                    onChange={(e) => setPrixVente(Number(e.target.value))}
+                    min="0"
+                    step="0.01"
+                    className="h-9 mt-2"
+                    placeholder="Entrez un montant..."
+                  />
+                )}
               </div>
 
+              {/* Marge */}
               <div className="space-y-2">
                 <Label htmlFor="marge" className="text-xs">
-                  Taux de marge (%)
+                  Taux de marge
                 </Label>
-                <Input
+                <select
                   id="marge"
-                  type="number"
-                  value={marge}
-                  onChange={(e) => setMarge(Number(e.target.value))}
-                  min="0"
-                  max="100"
-                  className="h-9"
-                />
+                  value={margeMode}
+                  onChange={(e) => handleMargeChange(e.target.value)}
+                  className={cn(
+                    "flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors",
+                    "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                    "disabled:cursor-not-allowed disabled:opacity-50"
+                  )}
+                >
+                  <option value="15">Industrie (15%)</option>
+                  <option value="50">E-commerce (50%)</option>
+                  <option value="90">Service (90%)</option>
+                  <option value="custom">Personnalisé</option>
+                </select>
+                {margeMode === "custom" && (
+                  <Input
+                    type="number"
+                    value={marge}
+                    onChange={(e) => setMarge(Number(e.target.value))}
+                    min="0"
+                    max="100"
+                    step="1"
+                    className="h-9 mt-2"
+                    placeholder="Entrez un pourcentage..."
+                  />
+                )}
               </div>
             </div>
           </SidebarGroupContent>
@@ -93,57 +206,129 @@ export function CalculatorSidebar({
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <div className="space-y-4 px-2">
+              {/* Budget mensuel */}
               <div className="space-y-2">
                 <Label htmlFor="budget" className="text-xs">
                   Budget mensuel (€)
                 </Label>
-                <Input
+                <select
                   id="budget"
-                  type="number"
-                  value={budgetMensuel}
-                  onChange={(e) => setBudgetMensuel(Number(e.target.value))}
-                  min="0"
-                  step="100"
-                  className="h-9"
-                />
+                  value={budgetMode}
+                  onChange={(e) => handleBudgetChange(e.target.value)}
+                  className={cn(
+                    "flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors",
+                    "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                    "disabled:cursor-not-allowed disabled:opacity-50"
+                  )}
+                >
+                  <option value="300">300€</option>
+                  <option value="500">500€</option>
+                  <option value="1000">1000€</option>
+                  <option value="custom">Personnalisé</option>
+                </select>
+                {budgetMode === "custom" && (
+                  <Input
+                    type="number"
+                    value={budgetMensuel}
+                    onChange={(e) => setBudgetMensuel(Number(e.target.value))}
+                    min="0"
+                    step="100"
+                    className="h-9 mt-2"
+                    placeholder="Entrez un budget..."
+                  />
+                )}
               </div>
 
+              {/* Coût par clic */}
               <div className="space-y-2">
                 <Label htmlFor="cpc" className="text-xs">
-                  Coût par clic (€)
+                  Coût par clic
                 </Label>
-                <Input
+                <select
                   id="cpc"
-                  type="number"
-                  value={cpc}
-                  onChange={(e) => setCpc(Number(e.target.value))}
-                  min="0.01"
-                  step="0.1"
-                  className="h-9"
-                />
+                  value={cpcMode}
+                  onChange={(e) => handleCpcChange(e.target.value)}
+                  className={cn(
+                    "flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors",
+                    "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                    "disabled:cursor-not-allowed disabled:opacity-50"
+                  )}
+                >
+                  <option value="0.20">Peu de concurrence (0,20€)</option>
+                  <option value="1">Concurrence moyenne (1€)</option>
+                  <option value="2.5">Forte concurrence (2,50€)</option>
+                  <option value="custom">Personnalisé</option>
+                </select>
+                {cpcMode === "custom" && (
+                  <Input
+                    type="number"
+                    value={cpc}
+                    onChange={(e) => setCpc(Number(e.target.value))}
+                    min="0.01"
+                    step="0.1"
+                    className="h-9 mt-2"
+                    placeholder="Entrez un coût..."
+                  />
+                )}
               </div>
 
+              {/* Taux de conversion */}
               <div className="space-y-2">
                 <Label htmlFor="conversion" className="text-xs">
-                  Taux de conversion (%)
+                  Taux de conversion
                 </Label>
-                <Input
+                <select
                   id="conversion"
-                  type="number"
-                  value={tauxConversion}
-                  onChange={(e) => setTauxConversion(Number(e.target.value))}
-                  min="0"
-                  max="100"
-                  step="0.1"
-                  className="h-9"
-                />
+                  value={conversionMode}
+                  onChange={(e) => handleConversionChange(e.target.value)}
+                  className={cn(
+                    "flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors",
+                    "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                    "disabled:cursor-not-allowed disabled:opacity-50"
+                  )}
+                >
+                  <option value="12.5">Site moderne (12,5%)</option>
+                  <option value="6">Site fonctionnel (6%)</option>
+                  <option value="2">Site dépassé (2%)</option>
+                  <option value="custom">Personnalisé</option>
+                </select>
+                {conversionMode === "custom" && (
+                  <Input
+                    type="number"
+                    value={tauxConversion}
+                    onChange={(e) => setTauxConversion(Number(e.target.value))}
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    className="h-9 mt-2"
+                    placeholder="Entrez un pourcentage..."
+                  />
+                )}
               </div>
             </div>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 mt-auto">
+      {/* Card ROAS */}
+      <div className="px-4 pb-4">
+        <Card className={cn(
+          "p-4 transition-colors",
+          getRoasColor()
+        )}>
+          <div className="space-y-2">
+            <div className={cn("flex items-center justify-between", getRoasTextColor())}>
+              <span className="text-sm font-medium">ROAS</span>
+              <span className="text-2xl font-bold">{roas.toFixed(2)}</span>
+            </div>
+            <p className={cn("text-xs", getRoasTextColor())}>
+              {getRoasMessage()}
+            </p>
+          </div>
+        </Card>
+      </div>
+
+      <SidebarFooter className="p-4 pt-0 mt-auto">
         <Button size="sm" className="gap-2 w-full">
           <BarChart3 className="w-4 h-4" />
           Recevoir l'analyse
