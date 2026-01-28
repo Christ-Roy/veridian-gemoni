@@ -42,12 +42,27 @@ export function CalculatorSidebar({
   tauxConversion,
   setTauxConversion,
 }: CalculatorSidebarProps) {
+  // Déterminer les modes initiaux en fonction des props
+  const getInitialMode = (value: number, options: number[]) => {
+    return options.includes(value) ? String(value) : "custom";
+  };
+
   // États pour gérer les modes personnalisés
-  const [prixVenteMode, setPrixVenteMode] = useState<string>("100");
-  const [margeMode, setMargeMode] = useState<string>("15");
-  const [budgetMode, setBudgetMode] = useState<string>("1000");
-  const [cpcMode, setCpcMode] = useState<string>("2");
-  const [conversionMode, setConversionMode] = useState<string>("3");
+  const [prixVenteMode, setPrixVenteMode] = useState<string>(() =>
+    getInitialMode(prixVente, [100, 500, 2000])
+  );
+  const [margeMode, setMargeMode] = useState<string>(() =>
+    getInitialMode(marge, [15, 50, 90])
+  );
+  const [budgetMode, setBudgetMode] = useState<string>(() =>
+    getInitialMode(budgetMensuel, [300, 500, 1000])
+  );
+  const [cpcMode, setCpcMode] = useState<string>(() =>
+    getInitialMode(cpc, [0.5, 2.5, 10])
+  );
+  const [conversionMode, setConversionMode] = useState<string>(() =>
+    getInitialMode(tauxConversion, [9, 6, 2])
+  );
 
   // Gestion du changement de prix de vente
   const handlePrixVenteChange = (value: string) => {
@@ -89,30 +104,31 @@ export function CalculatorSidebar({
     }
   };
 
-  // Calcul du ROAS (Return On Ad Spend)
-  const roas = useMemo(() => {
+  // Calcul du ROI (Return On Investment) avec marge - en facteur
+  const roi = useMemo(() => {
     const clicsMensuels = budgetMensuel / cpc;
     const conversions = (clicsMensuels * tauxConversion) / 100;
     const chiffreAffaires = conversions * prixVente;
-    return budgetMensuel > 0 ? chiffreAffaires / budgetMensuel : 0;
-  }, [prixVente, budgetMensuel, cpc, tauxConversion]);
+    const margeBrute = (chiffreAffaires * marge) / 100;
+    return budgetMensuel > 0 ? margeBrute / budgetMensuel : 0;
+  }, [prixVente, marge, budgetMensuel, cpc, tauxConversion]);
 
-  // Déterminer la couleur et le message selon le ROAS
-  const getRoasColor = () => {
-    if (roas < 1) return "bg-destructive";
-    if (roas < 2) return "bg-[oklch(0.7686_0.1647_70.0804)]"; // Jaune/Orange
+  // Déterminer la couleur et le message selon le ROI
+  const getRoiColor = () => {
+    if (roi < 1) return "bg-destructive";
+    if (roi < 2) return "bg-[oklch(0.7686_0.1647_70.0804)]"; // Jaune/Orange
     return "bg-primary";
   };
 
-  const getRoasTextColor = () => {
-    if (roas < 1) return "text-destructive-foreground";
-    if (roas < 2) return "text-foreground";
+  const getRoiTextColor = () => {
+    if (roi < 1) return "text-destructive-foreground";
+    if (roi < 2) return "text-foreground";
     return "text-primary-foreground";
   };
 
-  const getRoasMessage = () => {
-    const roasFormatted = roas.toFixed(2);
-    return `1€ dans Google Ads ramène ${roasFormatted}€ de CA`;
+  const getRoiMessage = () => {
+    const roasFormatted = roi.toFixed(2);
+    return `1€ investi rapporte ${roasFormatted}€`;
   };
 
   return (
@@ -254,9 +270,9 @@ export function CalculatorSidebar({
                     "disabled:cursor-not-allowed disabled:opacity-50"
                   )}
                 >
-                  <option value="0.20">Peu de concurrence (0,20€)</option>
-                  <option value="1">Concurrence moyenne (1€)</option>
-                  <option value="2.5">Forte concurrence (2,50€)</option>
+                  <option value="0.5">Faible concurrence (0,50€)</option>
+                  <option value="2.5">Concurrence moyenne (2,50€)</option>
+                  <option value="10">Forte concurrence (10€)</option>
                   <option value="custom">Personnalisé</option>
                 </select>
                 {cpcMode === "custom" && (
@@ -287,7 +303,7 @@ export function CalculatorSidebar({
                     "disabled:cursor-not-allowed disabled:opacity-50"
                   )}
                 >
-                  <option value="12.5">Site moderne (12,5%)</option>
+                  <option value="9">Site moderne (9%)</option>
                   <option value="6">Site fonctionnel (6%)</option>
                   <option value="2">Site dépassé (2%)</option>
                   <option value="custom">Personnalisé</option>
@@ -310,19 +326,19 @@ export function CalculatorSidebar({
         </SidebarGroup>
       </SidebarContent>
 
-      {/* Card ROAS */}
+      {/* Card ROI */}
       <div className="px-4 pb-4">
         <Card className={cn(
           "p-4 transition-colors",
-          getRoasColor()
+          getRoiColor()
         )}>
           <div className="space-y-2">
-            <div className={cn("flex items-center justify-between", getRoasTextColor())}>
-              <span className="text-sm font-medium">ROAS</span>
-              <span className="text-2xl font-bold">{roas.toFixed(2)}</span>
+            <div className={cn("flex items-center justify-between", getRoiTextColor())}>
+              <span className="text-sm font-medium">ROI</span>
+              <span className="text-2xl font-bold">{roi < 0 ? '-' : ''}{Math.abs(roi).toFixed(2)}</span>
             </div>
-            <p className={cn("text-xs", getRoasTextColor())}>
-              {getRoasMessage()}
+            <p className={cn("text-xs", getRoiTextColor())}>
+              {getRoiMessage()}
             </p>
           </div>
         </Card>

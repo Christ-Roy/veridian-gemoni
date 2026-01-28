@@ -22,11 +22,11 @@ const chartConfig = {
     color: "var(--color-chart-3)",
   },
   conversions: {
-    label: "Conversions",
+    label: "Ventes",
     color: "var(--color-chart-4)",
   },
   profit: {
-    label: "Profit net",
+    label: "Bénéfice Total",
     color: "var(--color-chart-2)",
   },
 } satisfies ChartConfig;
@@ -72,12 +72,12 @@ const CustomTooltip = ({ active, payload }: TooltipProps) => {
 };
 
 export function RoiCalculator() {
-  // États du formulaire
+  // États du formulaire (correspondent aux valeurs par défaut des selects)
   const [prixVente, setPrixVente] = useState(100);
-  const [marge, setMarge] = useState(30);
-  const [budgetMensuel, setBudgetMensuel] = useState(1000);
-  const [cpc, setCpc] = useState(2);
-  const [tauxConversion, setTauxConversion] = useState(3);
+  const [marge, setMarge] = useState(50);
+  const [budgetMensuel, setBudgetMensuel] = useState(300);
+  const [cpc, setCpc] = useState(2.5);
+  const [tauxConversion, setTauxConversion] = useState(6);
   const [selectedMetrics, setSelectedMetrics] = useState<string[]>(["budget"]);
 
   // Toggle métrique (permet de sélectionner/désélectionner)
@@ -105,7 +105,7 @@ export function RoiCalculator() {
       budget: budgetMensuel,
       clicks: Math.round(clicsMensuels),
       conversions: Math.round(conversions * 10) / 10,
-      profit: Math.round(profitNet),
+      profit: Math.round(margeBrute),
       roi: Math.round(roi * 10) / 10,
     };
   }, [prixVente, marge, budgetMensuel, cpc, tauxConversion]);
@@ -168,7 +168,7 @@ export function RoiCalculator() {
     },
     {
       key: "conversions",
-      label: "Conversions",
+      label: "Ventes",
       value: metrics.conversions,
       previousValue: Math.round(metrics.conversions * 0.85 * 10) / 10,
       format: (val: number) => val.toLocaleString('fr-FR'),
@@ -176,7 +176,7 @@ export function RoiCalculator() {
     },
     {
       key: "profit",
-      label: "Profit Net",
+      label: "Bénéfice Total",
       value: metrics.profit,
       previousValue: Math.round(metrics.profit * 0.85),
       format: (val: number) => `${val.toLocaleString('fr-FR')}€`,
@@ -200,21 +200,20 @@ export function RoiCalculator() {
           setTauxConversion={setTauxConversion}
         />
         <SidebarInset className="flex-1 h-full overflow-auto">
-          {/* Navbar sticky en haut */}
+          {/* Navbar sticky en haut avec bouton sidebar */}
           <div className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <SiteNavbar />
+            <div className="flex items-center pt-6">
+              <SidebarTrigger className="ml-6" />
+              <div className="flex-1">
+                <SiteNavbar />
+              </div>
+            </div>
           </div>
 
           <div className="w-full h-full flex flex-col">
-            {/* Titre et description */}
+            {/* Titre */}
             <div className="px-6 pt-20 pb-8 flex-shrink-0 text-center">
-              <div className="flex items-center justify-center gap-2 mb-4">
-                <SidebarTrigger className="absolute left-6" />
-                <h1 className="text-3xl font-bold">Calculateur ROI Google Ads</h1>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Estimez la rentabilité de vos campagnes publicitaires en temps réel
-              </p>
+              <h1 className="text-3xl font-bold">Simulateur de Campagne Google ADS</h1>
             </div>
 
             <Card className="@container w-full flex-1 flex flex-col min-h-0 py-0 pb-6 rounded-none">
@@ -228,6 +227,57 @@ export function RoiCalculator() {
 
                   const isSelected = selectedMetrics.includes(metric.key);
                   const metricColor = chartConfig[metric.key as keyof typeof chartConfig]?.color;
+
+                  // Contenu personnalisé selon la métrique
+                  const getBadgeContent = () => {
+                    if (metric.key === "budget") {
+                      return null; // Pas de badge pour le budget
+                    }
+                    if (metric.key === "clicks") {
+                      return (
+                        <Badge variant="success" appearance="outline" size="sm">
+                          <Target className="size-3" />
+                          {tauxConversion}%
+                        </Badge>
+                      );
+                    }
+                    if (metric.key === "conversions") {
+                      return (
+                        <Badge variant="success" appearance="outline" size="sm">
+                          <Target className="size-3" />
+                          {tauxConversion}%
+                        </Badge>
+                      );
+                    }
+                    if (metric.key === "profit") {
+                      const roiFactor = (metric.value / metrics.budget);
+                      return (
+                        <Badge variant={roiFactor >= 1 ? "success" : "destructive"} appearance="outline" size="sm">
+                          x{roiFactor.toFixed(2)}
+                        </Badge>
+                      );
+                    }
+                    return (
+                      <Badge variant={isPositive ? "success" : "destructive"} appearance="outline" size="sm">
+                        {isPositive ? <ArrowUp className="size-3" /> : <ArrowDown className="size-3" />}
+                        {Math.abs(change).toFixed(1)}%
+                      </Badge>
+                    );
+                  };
+
+                  // Sous-titre avec calcul
+                  const getSubtitle = () => {
+                    if (metric.key === "clicks") {
+                      return "Budget dépensé ÷ Coût par clic";
+                    }
+                    if (metric.key === "conversions") {
+                      return "Nombre de clics × Taux de conversion";
+                    }
+                    if (metric.key === "profit") {
+                      return "Prix produit × Marge × Ventes";
+                    }
+                    return null;
+                  };
 
                   return (
                     <button
@@ -245,15 +295,14 @@ export function RoiCalculator() {
                           <Icon className="w-4 h-4" />
                           <span>{metric.label}</span>
                         </div>
-                        <Badge variant={isPositive ? "success" : "destructive"} appearance="outline" size="sm">
-                          {isPositive ? <ArrowUp className="size-3" /> : <ArrowDown className="size-3" />}
-                          {Math.abs(change).toFixed(1)}%
-                        </Badge>
+                        {getBadgeContent()}
                       </div>
                       <div className="text-2xl font-bold">{metric.format(metric.value)}</div>
-                      <div className="text-xs text-muted-foreground mt-1">
-                        depuis {metric.format(metric.previousValue)}
-                      </div>
+                      {getSubtitle() && (
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {getSubtitle()}
+                        </div>
+                      )}
                     </button>
                   );
                 })}
