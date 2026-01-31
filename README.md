@@ -1,36 +1,135 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🌐 Veridian - Site Agence Web
 
-## Getting Started
+Site d'agence web professionnel créé avec Next.js 14, Tailwind CSS et shadcn/ui.
 
-First, run the development server:
+## 🚀 Démarrage Rapide
 
 ```bash
+# Installer les dépendances
+npm install
+
+# Lancer en développement
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Build pour production
+npm run build
+
+# Lancer en production
+npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Le site sera accessible sur http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📁 Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+veridian-gemoni/
+├── app/
+│   └── (marketing)/          # Pages marketing
+│       ├── page.tsx          # Accueil
+│       ├── services/         # Page Services
+│       ├── about/            # Page À propos
+│       ├── portfolio/        # Page Portfolio
+│       ├── contact/          # Page Contact
+│       ├── pricing/          # Page Tarifs
+│       ├── maintenance/      # Page Maintenance
+│       ├── faq/              # Page FAQ
+│       └── audit/            # Page Audit Gratuit
+├── components/
+│   ├── block/                # Composants réutilisables
+│   └── ui/                   # Composants shadcn/ui
+├── hooks/                    # React hooks
+├── lib/                      # Utilitaires
+└── public/                   # Assets statiques
+```
 
-## Learn More
+## 📦 Technologies
 
-To learn more about Next.js, take a look at the following resources:
+- **Framework** : Next.js 14 (App Router)
+- **Styling** : Tailwind CSS
+- **UI Components** : shadcn/ui
+- **Icons** : Lucide React
+- **Forms** : React Hook Form + Zod
+- **Animation** : Framer Motion
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📄 Pages Disponibles
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Page | URL | Description |
+|------|-----|-------------|
+| Accueil | `/` | Landing page principale |
+| Services | `/services` | Packages et tarifs |
+| À propos | `/about` | Histoire et valeurs |
+| Portfolio | `/portfolio` | Réalisations clients |
+| Contact | `/contact` | Formulaire de contact |
+| Tarifs | `/pricing` | Grille tarifaire détaillée |
+| Maintenance | `/maintenance` | Offre de maintenance |
+| FAQ | `/faq` | Questions fréquentes |
+| Audit | `/audit` | Demande d'audit gratuit |
 
-## Deploy on Vercel
+## 🎨 Personnalisation
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Couleurs
+Modifier `tailwind.config.js` :
+```js
+theme: {
+  extend: {
+    colors: {
+      primary: "...",
+      // etc.
+    }
+  }
+}
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Contenu
+1. **Contact** : Mettre à jour email/téléphone dans :
+   - `app/(marketing)/contact/page.tsx`
+   - `components/block/footer-section-agence.tsx`
+
+2. **À propos** : Personnaliser dans `app/(marketing)/about/page.tsx`
+
+3. **Portfolio** : Remplacer projets fictifs dans `app/(marketing)/portfolio/page.tsx`
+
+## 📋 TODO Avant Mise en Ligne
+
+- [ ] Personnaliser infos de contact
+- [ ] Ajouter vraie photo fondateur
+- [ ] Configurer backend formulaires
+- [ ] Créer pages légales (Mentions, RGPD)
+- [ ] Google Analytics
+- [ ] Optimiser images
+
+Voir `FINAL-REPORT.md` pour la checklist complète.
+
+## 🚢 Déploiement
+
+### Vercel (Recommandé)
+```bash
+npm i -g vercel
+vercel
+```
+
+### Netlify
+```bash
+npm run build
+netlify deploy --prod
+```
+
+## 📚 Documentation
+
+- [PLAN-GEMONI.md](./PLAN-GEMONI.md) - Plan de développement
+- [RECAPITULATIF-GEMONI.md](./RECAPITULATIF-GEMONI.md) - Récapitulatif complet
+- [FINAL-REPORT.md](./FINAL-REPORT.md) - Rapport final et checklist
+
+## 📞 Support
+
+Pour toute question sur le code, consulter :
+- [Next.js Docs](https://nextjs.org/docs)
+- [Tailwind CSS Docs](https://tailwindcss.com/docs)
+- [shadcn/ui Docs](https://ui.shadcn.com)
+
+---
+
+**Version** : 1.0  
+**Status** : Production Ready  
+**Créé** : 2026-01-30

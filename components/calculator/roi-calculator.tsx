@@ -309,7 +309,7 @@ export function RoiCalculator() {
               </div>
             </CardHeader>
 
-            <CardContent className="p-6 flex-1 flex items-center min-h-0">
+            <CardContent className="p-6 flex-1 flex items-center min-h-0 hidden md:flex">
               <ChartContainer
                 config={chartConfig}
                 className="h-full w-full max-h-full overflow-visible [&_.recharts-curve.recharts-tooltip-cursor]:stroke-initial"

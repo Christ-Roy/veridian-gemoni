@@ -1,4 +1,5 @@
 import { SiteNavbar } from "@/components/block/site-navbar";
+import { FooterSection } from "@/components/block/footer-section-agence";
 import { BackgroundDots } from "@/components/ui/background-dots";
 
 export default function MarketingLayout({
@@ -10,6 +11,7 @@ export default function MarketingLayout({
     <BackgroundDots>
       <SiteNavbar />
       {children}
+      <FooterSection />
     </BackgroundDots>
   );
 }
